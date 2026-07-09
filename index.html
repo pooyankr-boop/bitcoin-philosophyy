@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>بیت‌کوین و فلسفه | نیک لند</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Vazirmatn:wght@100..900&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg: #05070a;
+  --bg-panel: #0b0f14;
+  --bg-elevated: #101820;
+  --line: #1c2b28;
+  --green: #39ff88;
+  --green-dim: #1f8f52;
+  --red: #ff3b4e;
+  --gold: #d9b04b;
+  --text: #d7e6e0;
+  --text-dim: #8aa39a;
+  --font-scale: 1;
+  --line-height: 1.9;
+  --green-a10: rgba(57,255,136,0.10);
+  --green-a15: rgba(57,255,136,0.15);
+  --green-a30: rgba(57,255,136,0.30);
+  --green-a35: rgba(57,255,136,0.35);
+  --green-a40: rgba(57,255,136,0.40);
+  --green-a60: rgba(57,255,136,0.60);
+  --red-a09: rgba(255,59,78,0.09);
+  --gold-a06: rgba(217,176,75,0.06);
+  --gold-a07: rgba(217,176,75,0.07);
+  --gold-a08: rgba(217,176,75,0.08);
+}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse at 15% -10%, var(--green-a10), transparent 45%),
+    radial-gradient(ellipse at 92% 8%, var(--red-a09), transparent 42%),
+    radial-gradient(ellipse at 50% 120%, var(--gold-a07), transparent 50%),
+    var(--bg);
+  color:var(--text);
+  font-family:'Vazirmatn', sans-serif;
+  font-size:calc(17px * var(--font-scale));
+  line-height:var(--line-height);
+  direction:rtl;
+  transition:background .4s;
+}
+::selection{background:var(--green); color:#000;}
+a{color:var(--green); text-decoration:none; border-bottom:1px dotted var(--green-dim);}
+a:hover{color:var(--gold); border-color:var(--gold);}
+h1,h2,h3,h4{font-family:'Vazirmatn', sans-serif; letter-spacing:0; color:var(--text);}
+
+/* subtle animated grid backdrop */
+.grid-overlay{
+  position:absolute; inset:0; pointer-events:none; opacity:.12;
+  background-image:
+    linear-gradient(var(--green-a60) 1px, transparent 1px),
+    linear-gradient(90deg, var(--green-a60) 1px, transparent 1px);
+  background-size:42px 42px;
+  mask-image: radial-gradient(ellipse at center, black 20%, transparent 75%);
+}
+
+/* ---------- Topbar ---------- */
+.topbar{
+  position:sticky; top:0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between;
+  padding:10px 18px;
+  background:rgba(5,7,10,0.88);
+  backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--line);
+}
+.topbar::after{
+  content:""; position:absolute; left:0; right:0; bottom:-1px; height:2px;
+  background:linear-gradient(90deg, var(--green), var(--gold), var(--red), var(--green));
+  background-size:300% 100%; animation:flow 8s linear infinite; opacity:.7;
+}
+@keyframes flow{ to{ background-position:300% 0; } }
+.topbar .brand{
+  display:flex; align-items:center; gap:10px;
+  font-weight:700; font-size:1rem; color:var(--green);
+}
+.topbar .brand .dot{width:8px; height:8px; border-radius:50%; background:var(--red); box-shadow:0 0 10px var(--red); animation:pulse 2s ease-in-out infinite;}
+@keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.35;} }
+.topbar .tools{display:flex; gap:8px;}
+.icon-btn{
+  background:var(--bg-panel); border:1px solid var(--line); color:var(--text);
+  width:38px; height:38px; border-radius:8px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:1.1rem;
+  transition:.2s;
+}
+.icon-btn:hover{border-color:var(--green); color:var(--green); box-shadow:0 0 12px var(--green-a40);}
+
+/* ---------- Drawers ---------- */
+.drawer-overlay{
+  position:fixed; inset:0; background:rgba(0,0,0,.65); z-index:60;
+  opacity:0; pointer-events:none; transition:.25s;
+}
+.drawer-overlay.open{opacity:1; pointer-events:auto;}
+.drawer{
+  position:fixed; top:0; bottom:0; width:min(340px, 86vw);
+  background:var(--bg-panel); z-index:61; padding:20px;
+  overflow-y:auto; transition:transform .3s ease;
+  box-shadow:0 0 60px rgba(0,0,0,.6);
+}
+#tocDrawer{right:0; transform:translateX(100%); border-left:1px solid var(--line);}
+#tocDrawer.open{transform:translateX(0);}
+#settingsDrawer{left:0; transform:translateX(-100%); border-right:1px solid var(--line);}
+#settingsDrawer.open{transform:translateX(0);}
+.drawer h3{color:var(--gold); border-bottom:1px solid var(--line); padding-bottom:10px; margin-top:0;}
+
+.toc-tree details{margin-bottom:4px;}
+.toc-tree summary{cursor:pointer; padding:7px 8px; border-radius:6px; color:var(--text); list-style:none;}
+.toc-tree summary::-webkit-details-marker{display:none;}
+.toc-tree summary::before{content:"▸"; color:var(--green); display:inline-block; margin-left:6px; transition:.2s;}
+.toc-tree details[open] > summary::before{transform:rotate(90deg);}
+.toc-tree summary:hover{background:var(--green-a10); color:var(--green);}
+.toc-tree ul{list-style:none; padding-right:18px; margin:2px 0 8px 0; border-right:1px dashed var(--line);}
+.toc-tree li a{display:block; padding:5px 8px; font-size:.92rem; color:var(--text-dim); border:none;}
+.toc-tree li a:hover{color:var(--gold);}
+
+.set-row{margin-bottom:22px;}
+.set-row label{display:block; font-size:.85rem; color:var(--text-dim); margin-bottom:8px;}
+.set-btns{display:flex; gap:8px; flex-wrap:wrap;}
+.set-btns button{
+  flex:1; min-width:70px; padding:8px; background:var(--bg-elevated); border:1px solid var(--line);
+  color:var(--text); border-radius:6px; cursor:pointer; font-family:inherit; font-size:.85rem;
+}
+.set-btns button.active{border-color:var(--green); color:var(--green); box-shadow:0 0 10px var(--green-a35);}
+.set-btns button:hover{border-color:var(--green); color:var(--green);}
+.theme-swatch{display:inline-block; width:12px; height:12px; border-radius:50%; margin-left:6px; vertical-align:middle;}
+input[type=range]{width:100%; accent-color: var(--green);}
+
+/* ---------- Layout ---------- */
+.container{max-width:900px; margin:0 auto; padding:0 22px; position:relative;}
+.wide{max-width:1180px;}
+section{padding:60px 0; position:relative;}
+h2.chapter-title{
+  font-size:1.9rem; color:var(--text); margin:0 0 24px 0; padding-bottom:18px;
+  position:relative; display:flex; align-items:center; gap:12px;
+}
+h2.chapter-title::after{
+  content:""; position:absolute; right:0; left:0; bottom:0; height:2px;
+  background:linear-gradient(90deg, var(--green), var(--gold) 50%, transparent);
+}
+h2.chapter-title .num{color:var(--gold); font-family:'JetBrains Mono',monospace; font-size:1.3rem;
+  border:1px solid var(--gold); border-radius:6px; padding:2px 10px; background:var(--gold-a08);}
+h4{color:var(--gold); margin-top:32px;}
+p{margin:0 0 18px 0;}
+hr.divider{border:none; border-top:1px solid var(--line); margin:50px 0; position:relative;}
+hr.divider::after{content:"◆"; position:absolute; right:50%; top:-9px; background:var(--bg); color:var(--green-dim); padding:0 12px; font-size:.7rem;}
+.eyebrow{font-family:'JetBrains Mono',monospace; direction:ltr; text-align:right; color:var(--green-dim); font-size:.72rem; letter-spacing:1px; margin-bottom:8px; opacity:.85;}
+
+/* Cover */
+.cover{min-height:92vh; display:flex; flex-direction:column; align-items:center; justify-content:center; text-align:center; overflow:hidden; padding:40px 20px;}
+.cover img{max-width:min(520px, 80vw); border:1px solid var(--line); border-radius:4px; box-shadow:0 0 70px var(--green-a15);}
+.cover h1{font-size:clamp(2rem,5vw,3.4rem); margin:34px 0 6px; color:var(--text); text-shadow:0 0 30px var(--green-a30);}
+.cover .subtitle{color:var(--gold); font-size:1.15rem; margin-bottom:6px;}
+
+.colophon{
+  border:1px solid var(--line); background:var(--bg-panel); border-radius:10px; padding:22px 26px;
+  font-family:'JetBrains Mono',monospace; font-size:.82rem; color:var(--text-dim); line-height:2.1; position:relative;
+}
+.colophon::before, .colophon::after{content:""; position:absolute; width:16px; height:16px; border:2px solid var(--green); opacity:.6;}
+.colophon::before{top:-1px; right:-1px; border-left:none; border-bottom:none;}
+.colophon::after{bottom:-1px; left:-1px; border-right:none; border-top:none;}
+.colophon b{color:var(--green);}
+.colophon .credit-line{direction:ltr; text-align:center; color:var(--gold); margin-top:14px; letter-spacing:.5px;}
+
+.media-box{border:1px solid var(--line); border-radius:10px; overflow:hidden; background:#000; margin:26px 0; box-shadow:0 0 30px rgba(0,0,0,.4);}
+video, audio{width:100%; display:block;}
+figure{margin:34px 0; text-align:center; position:relative;}
+figure img{max-width:100%; border-radius:8px; border:1px solid var(--line);}
+figcaption{font-size:.82rem; color:var(--text-dim); margin-top:10px;}
+
+.notice-box{border-right:3px solid var(--gold); background:var(--gold-a06); padding:16px 20px; border-radius:6px; margin:30px 0;}
+.notice-box a{font-weight:700;}
+
+/* Inline term tooltip */
+.term{position:relative; border-bottom:1px dashed var(--gold); color:var(--text); cursor:help; padding:0 1px;}
+.term:hover{color:var(--gold);}
+.term:hover::after{
+  content: attr(data-en) "\A" attr(data-def);
+  white-space:pre-line; position:absolute; bottom:135%; right:50%; transform:translateX(50%);
+  width:250px; background:var(--bg-elevated); border:1px solid var(--green);
+  color:var(--text); padding:10px 12px; border-radius:8px; font-size:.76rem; line-height:1.7;
+  box-shadow:0 10px 34px rgba(0,0,0,.65); z-index:100; text-align:right;
+}
+.term:hover::before{
+  content:""; position:absolute; bottom:118%; right:50%; transform:translateX(50%);
+  border:6px solid transparent; border-top-color:var(--green); z-index:100;
+}
+
+.session-card{border:1px solid var(--line); border-radius:10px; padding:26px; margin:34px 0; background:var(--bg-panel); position:relative;}
+.session-card::before, .session-card::after{content:""; position:absolute; width:14px; height:14px; border:2px solid var(--red); opacity:.55;}
+.session-card::before{top:-1px; left:-1px; border-left:none; border-top:none;}
+.session-card::after{bottom:-1px; right:-1px; border-right:none; border-bottom:none;}
+.session-card .tag{display:inline-block; font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--bg); background:var(--green); padding:2px 10px; border-radius:20px; margin-bottom:12px;}
+.session-card h4{margin:0 0 4px; color:var(--text); font-size:1.15rem;}
+.session-card .theme{color:var(--red); font-size:.85rem; margin-bottom:14px;}
+
+.watch-guide{margin-top:20px; border-top:1px dashed var(--line); padding-top:14px;}
+.watch-guide .wg-title{font-family:'JetBrains Mono',monospace; font-size:.72rem; color:var(--green-dim); letter-spacing:1px; margin-bottom:10px;}
+.wg-row{display:flex; gap:10px; align-items:baseline; padding:5px 0; border-bottom:1px solid rgba(28,43,40,.7);}
+.wg-row:last-child{border-bottom:none;}
+.wg-time{font-family:'JetBrains Mono',monospace; direction:ltr; text-align:left; color:var(--gold); font-size:.76rem; min-width:96px;}
+.wg-topic{flex:1; font-size:.86rem; color:var(--text-dim);}
+.wg-star{color:var(--red); margin-left:4px; border:none; font-size:.9em;}
+.wg-star:hover{color:var(--gold);}
+
+.archive-final{text-align:center; padding:50px 0; border-top:1px solid var(--line); border-bottom:1px solid var(--line); font-family:'JetBrains Mono',monospace;}
+footer.end-colophon{padding:60px 0 90px;}
+
+::-webkit-scrollbar{width:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--green-dim); border-radius:10px;}
+@media (max-width: 700px){ .term:hover::after{width:200px; right:0; transform:none;} }
+</style>
+</head>
+<body>
+<div class="grid-overlay"></div>
+<div class="drawer-overlay" id="overlay"></div>
+
+<div class="drawer" id="tocDrawer">
+  <h3>فهرست درختی مطالب</h3>
+  <div class="toc-tree">
+    <details open><summary>جلد و مقدمه</summary>
+      <ul>
+        <li><a href="#cover">صفحه عنوان</a></li>
+        <li><a href="#colophon-top">شناسنامه اثر</a></li>
+        <li><a href="#intro-video">ویدیوی مقدماتی</a></li>
+        <li><a href="#notebook-link">دفترچهٔ کامل منابع</a></li>
+        <li><a href="#foreword">پیش‌گفتار</a></li>
+      </ul>
+    </details>
+    <details><summary>بخش اول: بنیادهای فنی</summary>
+      <ul>
+        <li><a href="#ch1">۱. بیت‌کوین: پول الکترونیکی همتا‌به‌همتا</a></li>
+        <li><a href="#ch2">۲. خروج از پوسته: خاستگاه پول</a></li>
+        <li><a href="#ch3">۳. قراردادهای هوشمند</a></li>
+      </ul>
+    </details>
+    <details><summary>بخش دوم: پایه‌های فلسفی</summary>
+      <ul>
+        <li><a href="#ch4">۴. لویاتان — هابز</a></li>
+        <li><a href="#ch5">۵. نقد عقل محض — کانت</a></li>
+        <li><a href="#ch6">۶. اعداد محاسباتی — تورینگ</a></li>
+        <li><a href="#ch7">۷. هستی و زمان — هایدگر</a></li>
+        <li><a href="#ch8">۸. سرمایه‌داری و اسکیزوفرنی — دلوز و گتاری</a></li>
+      </ul>
+    </details>
+    <details><summary>بخش سوم: سخنرانی‌های نیک لند</summary>
+      <ul>
+        <li><a href="#s1">جلسه ۱ — تحلیل انتزاعی سیستم بیت‌کوین</a></li>
+        <li><a href="#s2">جلسه ۲ — بازنصب مفاهیم بنیادین</a></li>
+        <li><a href="#s3">جلسه ۳ — رازهای آشکار</a></li>
+        <li><a href="#s4">جلسه ۴ — قدرت محاسباتی و Commercium</a></li>
+        <li><a href="#s5">جلسه ۵ — حقیقت، زمان و هستی</a></li>
+        <li><a href="#s6">جلسه ۶ — تکینگی و بازگشت</a></li>
+        <li><a href="#s7">جلسه ۷ — تحلیل نهایی پروتکل</a></li>
+        <li><a href="#s8">جلسه ۸ — جمع‌بندی و افق‌های نهایی</a></li>
+      </ul>
+    </details>
+    <details><summary>پیوست‌ها</summary>
+      <ul>
+        <li><a href="#podcast">پادکست شنیداری کتاب</a></li>
+        <li><a href="#archive-final">آرشیو کامل پروژه</a></li>
+        <li><a href="#colophon-end">شناسنامهٔ پایانی</a></li>
+      </ul>
+    </details>
+  </div>
+</div>
+
+<div class="drawer" id="settingsDrawer">
+  <h3>تنظیمات مطالعه</h3>
+  <div class="set-row">
+    <label>اندازهٔ قلم</label>
+    <div class="set-btns" id="scaleBtns">
+      <button data-scale="0.88" onclick="setScale(0.88,this)">کوچک</button>
+      <button data-scale="1" onclick="setScale(1,this)" class="active">معمولی</button>
+      <button data-scale="1.18" onclick="setScale(1.18,this)">بزرگ</button>
+      <button data-scale="1.36" onclick="setScale(1.36,this)">خیلی بزرگ</button>
+    </div>
+  </div>
+  <div class="set-row">
+    <label>تراکم خطوط</label>
+    <input type="range" min="1.4" max="2.4" step="0.1" value="1.9" id="lhRange" oninput="setLH(this.value)">
+  </div>
+  <div class="set-row">
+    <label>تم رنگی</label>
+    <div class="set-btns" id="themeBtns" style="flex-direction:column;">
+      <button data-theme="cyber" onclick="setTheme('cyber',this)" class="active"><span class="theme-swatch" style="background:#39ff88"></span>سایبری سبز/قرمز (پیش‌فرض)</button>
+      <button data-theme="noir" onclick="setTheme('noir',this)"><span class="theme-swatch" style="background:#c9a15a"></span>نویر خاکستری/طلایی</button>
+      <button data-theme="crimson" onclick="setTheme('crimson',this)"><span class="theme-swatch" style="background:#ff4d5e"></span>قرمز-طلاییِ مریخی</button>
+      <button data-theme="violet" onclick="setTheme('violet',this)"><span class="theme-swatch" style="background:#c561ff"></span>سایبرپانک بنفش-فیروزه‌ای</button>
+    </div>
+  </div>
+</div>
+
+<div class="topbar">
+  <div class="brand"><span class="dot"></span> بیت‌کوین و فلسفه</div>
+  <div class="tools">
+    <button class="icon-btn" onclick="toggleDrawer('settingsDrawer')" title="تنظیمات">⚙</button>
+    <button class="icon-btn" onclick="toggleDrawer('tocDrawer')" title="فهرست مطالب">☰</button>
+  </div>
+</div>
+
+<section class="cover" id="cover">
+  <img src="img-1.png" alt="لویاتان محاسباتی — جلد کتاب بیت‌کوین و فلسفه">
+  <h1>بیت‌کوین و فلسفه</h1>
+  <div class="subtitle">بر اساس سمینار هشت‌جلسه‌ای نیک لند</div>
+</section>
+
+<div class="container">
+<div class="colophon" id="colophon-top">
+  <div><b>عنوان اثر:</b> بیت‌کوین و فلسفه</div>
+  <div><b>بر پایهٔ:</b> سمینار هشت‌جلسه‌ای نیک لند</div>
+  <div><b>گردآوری، تدوین و ویرایش فارسی:</b> پویان کرمی</div>
+  <div><b>متون پایه:</b> ساتوشی ناکاموتو، نیک ابو، توماس هابز، ایمانوئل کانت، آلن تورینگ، مارتین هایدگر، ژیل دلوز و فلیکس گتاری</div>
+  <div class="credit-line">ترجمه و تلخیص: Sonnet / ویرایش: GPT / تصنیع: Pouyan / طراحی: Mistral / اصلاح: Gemma / صوت و تصویر: Gemini</div>
+</div>
+</div>
+<section id="intro-video">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">◆</span> ویدیوی مقدماتی پروژه</h2>
+    <div class="media-box">
+      <video controls preload="metadata" poster="img-1.png">
+        <source src="intro.mp4" type="video/mp4">
+        مرورگر شما از پخش ویدیو پشتیبانی نمی‌کند.
+      </video>
+    </div>
+    <div class="notice-box" id="notebook-link">
+      برای دسترسی به مجموعهٔ کامل منابع، اسناد، و مکالمات پژوهشی پشت این پروژه، می‌توانید به دفترچهٔ NotebookLM مراجعه کنید:
+      <br><a href="https://notebooklm.google.com/notebook/072d09b0-ab40-4fd6-af53-785fd772bfe0" target="_blank" rel="noopener">notebooklm.google.com/notebook/072d09b0-ab40-4fd6-af53-785fd772bfe0</a>
+    </div>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="foreword">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">◆</span> پیش‌گفتار</h2>
+    <p>در پاییز ۲۰۰۸، سندی نُه‌صفحه‌ای با امضای شخصی به نام ساتوشی ناکاموتو در یک فهرست پستی رمزنگاری منتشر شد. سند ادعای بزرگی نداشت؛ فقط یک راه‌حل فنی برای مسئله‌ای قدیمی ارائه می‌داد: چگونه می‌توان بدون واسطه‌ای مورد اعتماد، از دوبار خرج‌شدن یک واحد ارزش دیجیتال جلوگیری کرد؟ اما آنچه از دل این راه‌حل بیرون آمد، چیزی فراتر از یک پروتکل پرداخت بود؛ نوعی بازتعریف رابطهٔ انسان با زمان، حقیقت، مالکیت و حاکمیت.</p>
+    <p>نیک لند، فیلسوفی که در دههٔ ۱۹۹۰ با نوشتارهای شتاب‌گرایانه‌اش دربارهٔ سرمایه، فناوری و آخرالزمان شناخته شد، در سمینار هشت‌جلسه‌ای «بیت‌کوین و فلسفه» به سراغ همین سند رفت؛ نه برای شرح اقتصادی آن، بلکه برای خواندنش در کنار هابز، کانت، تورینگ، هایدگر و دلوز و گتاری. پرسش لند این بود: اگر بیت‌کوین را نه یک دارایی مالی، بلکه یک رخداد فلسفی بدانیم — رخدادی که در آن پروتکل جای قانون را می‌گیرد، زمان ماشین جای زمان انسانی را، و اجماع محاسباتی جای مرجعیت انسانی را — آنگاه چه چیزی دربارهٔ آیندهٔ عاملیت انسانی آشکار می‌شود؟</p>
+    <p>این کتاب تلاشی است برای بازسازی آن مسیر فکری به زبان فارسی: از متن اصلی ناکاموتو و ریشه‌های نظری آن نزد نیک ابو، عبور از سه سنگ‌بنای فلسفهٔ غرب دربارهٔ قدرت، ادراک و محاسبه‌پذیری (هابز، کانت، تورینگ)، تا رسیدن به دو خوانش قرن بیستمی از هستی و میل (هایدگر، دلوز و گتاری) که لند برای ساختن دستگاه مفهومی خود از آن‌ها وام می‌گیرد. بخش پایانی کتاب، گزارشی تحلیلی از هر یک از هشت جلسهٔ سخنرانی لند است، همراه با پخش مستقیم خودِ ویدیوها. برای شنیدن نسخهٔ فشرده و صوتی این مسیر نیز پادکستی در انتهای کتاب گنجانده شده است.</p>
+    <p>متن‌هایی که در ادامه می‌آیند، حاصل تلفیق چند ترجمهٔ موازی و بازبینی سبکی هستند تا با وجود تفاوت دوره و نویسنده، در سراسر کتاب یک صدای واحد و روان را دنبال کنند. برای اصطلاحات فنی و فلسفی، با نگه‌داشتن نشانگر ماوس روی واژهٔ هایلایت‌شده، معادل انگلیسی و تعریف کوتاه آن نمایان می‌شود.</p>
+  </div>
+</section>
+
+<hr class="divider">
+<section id="ch1">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۱</span> بیت‌کوین: سیستمی برای پول الکترونیکی همتا‌به‌همتا</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">نویسنده: ساتوشی ناکاموتو — ۳۱ اکتبر ۲۰۰۸</p>
+
+    <h4>چکیده</h4>
+    <p>نسخه‌ای کاملاً همتا‌به‌همتا از پول الکترونیکی امکان می‌دهد پرداخت‌های آنلاین مستقیماً از یک طرف به طرف دیگر ارسال شوند، بدون عبور از یک نهاد مالی. <span class="term" data-en="Digital signature" data-def="سازوکار رمزنگارانه‌ای که تأیید می‌کند صاحب یک کلید خصوصی، پیامی مشخص را تأیید کرده است.">امضای دیجیتال</span> بخشی از راه‌حل را فراهم می‌کند، اما اگر برای جلوگیری از <span class="term" data-en="Double-spending" data-def="تلاش برای هزینه‌کردن یک واحد ارزش دیجیتال بیش از یک‌بار.">دوبار خرج‌کردن</span> هنوز به یک طرف سوم قابل‌اعتماد نیاز باشد، اصل مزیت این سیستم از دست می‌رود. راه‌حل پیشنهادی، استفاده از شبکه‌ای همتا‌به‌همتا است که با تبدیل تراکنش‌ها به زنجیره‌ای پیوسته از <span class="term" data-en="Proof-of-work" data-def="سازوکاری که با صرف قدرت پردازشی قابل‌سنجش، هزینهٔ دستکاری تاریخچهٔ تراکنش‌ها را نجومی می‌کند.">اثبات کار</span> مبتنی بر هش، سابقه‌ای می‌سازد که بدون تکرار آن کار قابل تغییر نیست. طولانی‌ترین زنجیره، هم شاهد توالی رویدادهاست و هم اثبات این‌که از بزرگ‌ترین منبع قدرت پردازشی سرچشمه گرفته. تا وقتی اکثریت قدرت پردازشی در اختیار گره‌های صادق باشد، این زنجیره از هر زنجیرهٔ رقیب پیشی می‌گیرد.</p>
+
+    <h4>۱. مقدمه</h4>
+    <p>تجارت اینترنتی تقریباً به‌طور کامل به نهادهای مالی به‌عنوان واسطه‌های قابل‌اعتماد وابسته است؛ نظامی که هرچند برای اغلب تراکنش‌ها کارآمد است، از ضعف بنیادین مدل مبتنی بر اعتماد رنج می‌برد. برگشت‌پذیری، نیاز به میانجی‌گری در اختلافات را ایجاد می‌کند، هزینهٔ تراکنش را بالا می‌برد، و امکان معاملات کوچک و آنی را از بین می‌برد. آنچه لازم است، نظامی مبتنی بر اثبات رمزنگارانه به‌جای اعتماد است که به دو طرف مایل اجازه دهد بدون واسطه، مستقیماً معامله کنند. راه‌حل پیشنهادی این مقاله، <span class="term" data-en="Timestamp server" data-def="سازوکاری که با هش‌کردن و انتشار عمومی داده، ترتیب زمانی رویدادها را اثبات‌پذیر می‌کند.">سرور زمان‌بندی</span> توزیع‌شدهٔ همتا‌به‌همتا است که اثبات محاسباتی از توالی زمانی تراکنش‌ها می‌سازد.</p>
+
+    <h4>۲. تراکنش‌ها</h4>
+    <p>یک سکهٔ الکترونیکی را می‌توان زنجیره‌ای از امضاهای دیجیتال تعریف کرد: هر مالک، با امضای هشِ تراکنش پیشین و کلید عمومی مالک بعدی، سکه را منتقل می‌کند. مشکل این‌جاست که گیرندهٔ پول نمی‌تواند مطمئن شود مالک پیشین همان سکه را جای دیگری خرج نکرده. راه‌حل رایج، مرجعی مرکزی (ضرابخانه) است که هر تراکنش را برای دوبار‌خرجی بررسی کند — اما در این صورت، سرنوشت کل نظام پولی به همان مرجع مرکزی گره می‌خورد. راه‌حل بدیل این است که تراکنش‌ها علناً اعلام شوند و شرکت‌کنندگان بر سر ترتیب دریافتشان به توافق برسند.</p>
+
+    <h4>۳. سرور زمان‌بندی</h4>
+    <p>سرور زمان‌بندی با گرفتن هش از بلوکی از داده و انتشار گستردهٔ آن هش عمل می‌کند؛ هر زمان‌بندی، هشِ زمان‌بندی پیشین را در خود جای می‌دهد و زنجیره‌ای می‌سازد که هر حلقهٔ تازه، حلقه‌های پیشین را تحکیم می‌کند.</p>
+
+    <h4>۴. اثبات کار</h4>
+    <p>برای پیاده‌سازی این سرور به‌صورت توزیع‌شده، از سازوکاری شبیه Hashcash آدام بک استفاده می‌شود: جست‌وجو برای مقداری که هشِ آن با تعدادی بیت صفر آغاز شود. اثبات کار در واقع به شکل «یک‌پردازنده-یک‌رأی» عمل می‌کند، برخلاف مدل «یک‌آی‌پی-یک‌رأی» که به‌راحتی با تخصیص انبوه آی‌پی قابل دستکاری است. برای تغییر یک بلوک گذشته، مهاجم باید اثبات کار همان بلوک و تمام بلوک‌های پس از آن را از نو انجام دهد و سپس بر گره‌های صادق پیشی بگیرد — احتمالی که با هر بلوک تازه به‌صورت نمایی کاهش می‌یابد.</p>
+
+    <h4>۵ و ۶. شبکه و انگیزه</h4>
+    <p>گره‌ها تراکنش‌های تازه را جمع می‌کنند، روی اثبات کار بلوک خود تلاش می‌کنند، و بلوک پذیرفته‌شده را با کار روی بلوک بعدی تصدیق می‌کنند. همواره طولانی‌ترین زنجیره، زنجیرهٔ معتبر شناخته می‌شود. اولین تراکنش هر بلوک، پاداشی است که سکهٔ تازه به سازندهٔ بلوک می‌دهد — انگیزه‌ای برای پشتیبانی از شبکه که به‌مرور می‌تواند جای خود را به کارمزد تراکنش بدهد.</p>
+
+    <h4>۷ تا ۱۰. بازیابی فضا، تأیید ساده‌شده، ترکیب مقدار و حریم خصوصی</h4>
+    <p>با استفاده از <span class="term" data-en="Merkle Tree" data-def="ساختار داده‌ای درختی که امکان تأیید عضویت یک تراکنش در یک بلوک را بدون نگه‌داشتن کل داده فراهم می‌کند.">درخت مرکل</span>، تراکنش‌های قدیمی‌تر را می‌توان بدون شکستن هشِ بلوک از حافظه حذف کرد. کاربران می‌توانند بدون اجرای یک گرهٔ کامل، تنها با نگه‌داشتن سرآیندهای بلوک، پرداخت‌ها را با روش <span class="term" data-en="Simplified Payment Verification (SPV)" data-def="روشی برای تأیید تراکنش‌ها بدون اجرای یک گرهٔ کامل شبکه.">تأیید ساده‌شده</span> بررسی کنند. حریم خصوصی نه با پنهان‌کردن تراکنش‌ها، بلکه با ناشناس نگه‌داشتن کلیدهای عمومی حفظ می‌شود؛ شبیه سازوکار بورس که حجم و زمان معاملات را عمومی می‌کند بی‌آنکه طرفین را افشا کند.</p>
+
+    <h4>۱۱ و ۱۲. محاسبات و نتیجه‌گیری</h4>
+    <p>احتمال موفقیت مهاجمی که بخواهد زنجیره‌ای بدیل بسازد، همچون مسئلهٔ کلاسیک «ورشکستگی قمارباز» با فاصله گرفتن هر بلوک بیشتر، به‌صورت نمایی کاهش می‌یابد. نظامی برای تراکنش‌های الکترونیکی بدون تکیه به اعتماد پیشنهاد شد: شبکه‌ای همتا‌به‌همتا که با اثبات کار، تاریخچهٔ عمومی تراکنش‌ها را چنان می‌سازد که تا وقتی گره‌های صادق اکثریت قدرت پردازشی را در دست دارند، از نظر محاسباتی برای مهاجم غیرعملی می‌شود آن را دستکاری کند.</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">متن اصلی: <a href="https://bitcoin.org/bitcoin.pdf" target="_blank" rel="noopener">Bitcoin: A Peer-to-Peer Electronic Cash System — bitcoin.org/bitcoin.pdf</a></p>
+
+    <figure>
+      <img src="img-2.png" alt="اعتماد به انسان در برابر اثبات رمزنگارانه">
+      <figcaption>جایگزینی اعتماد انسانی با اثبات رمزنگارانه: از «طرف قابل‌اعتماد» به زنجیرهٔ بلوک‌های متصل با هش.</figcaption>
+    </figure>
+    <figure>
+      <img src="img-10.png" alt="حافظهٔ ابدی بلاک‌چین">
+      <figcaption>حافظهٔ انسانی و بانکی، متغیر و قابل ویرایش است؛ زنجیرهٔ بلوک، حافظه‌ای است که در آن فراموشی غیرممکن می‌شود.</figcaption>
+    </figure>
+
+    <p>سند ناکاموتو، در ظاهر، تنها یک راه‌حل مهندسی برای یک مسئلهٔ رمزنگارانه است. اما همین‌جا، در همین چند صفحه، بذر پرسش‌های فلسفی‌ای کاشته می‌شود که فصل‌های بعدی این کتاب یکی‌یکی آن‌ها را می‌گشایند: اگر اعتماد را بتوان با اثبات ریاضی جایگزین کرد، آنگاه برای فهم این جابه‌جایی باید به سراغ کهن‌ترین پرسش فلسفهٔ سیاسی رفت — پرسشی که توماس هابز سه قرن و نیم پیش از آن به بهترین شکل صورت‌بندی کرد: اساساً چرا انسان‌ها به یک قدرت مشترک نیاز دارند؟</p>
+  </div>
+</section>
+
+<hr class="divider">
+<section id="ch2">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۲</span> خروج از پوسته: خاستگاه پول</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">بر پایهٔ مقالهٔ «Shelling Out: The Origins of Money» — نیک ابو (۲۰۰۲)</p>
+
+    <p>پیش از آن‌که به سراغ خودِ بیت‌کوین برویم، لازم است بپرسیم پول اساساً چه چیزی است و از کجا می‌آید. پاسخ رایج اقتصاددانان کلاسیک، روایتی ساده و آشناست: زمانی انسان‌ها کالا را مستقیم با کالا مبادله می‌کردند، این کار دشوار بود، و پول به‌عنوان راه‌حلی میانجی برای تسهیل این مبادله اختراع شد. نیک ابو، در مقاله‌ای که سال‌ها پیش از ظهور بیت‌کوین نوشت، دقیقاً همین <span class="term" data-en="Barter myth" data-def="روایت اقتصاد کلاسیک که پول را جانشین مستقیم پایاپای کالا می‌داند؛ نیک ابو این روایت را تاریخاً بی‌پایه می‌داند.">اسطورهٔ مبادلهٔ کالا به کالا</span> را هدف می‌گیرد و آن را نه یک واقعیت تاریخی، بلکه یک فرضیهٔ راحت و بی‌مدرک می‌داند.</p>
+
+    <p>به گفتهٔ ابو، جوامع پیشاتاریخی به‌ندرت با پایاپای مستقیم دو کالا معامله می‌کردند، چرا که این کار مستلزم چیزی است که او آن را <span class="term" data-en="Cost of assaying" data-def="زحمت و زمانی که صرف سنجش ارزش واقعی یک کالای مبادله‌ای می‌شود.">هزینهٔ کیفیت‌سنجی</span> می‌نامد: پیش از هر معامله، هر دو طرف باید زمان و انرژی زیادی صرف کنند تا ارزش واقعی کالای طرف مقابل را بسنجند و هم‌زمان کسی را بیابند که دقیقاً به همان چیزی نیاز دارد که او عرضه می‌کند. آنچه واقعاً در این جوامع رایج بود، اشیای «قابل‌جمع‌آوری» بود — از صدف گرفته تا مهره‌های فلزی و پرها — که ارزش‌شان نه در مصرف مستقیم، بلکه در توانایی‌شان برای حمل و ذخیرهٔ اعتبار اجتماعی در طول زمان نهفته بود. این اشیا معمولاً هیچ کاربرد عملی نداشتند، اما دقیقاً همین بی‌کاربردی، آن‌ها را از دستکاری و تقلید مصون نگه می‌داشت و کمیابی‌شان را تضمین می‌کرد.</p>
+
+    <p>از این‌جا، ابو نتیجه می‌گیرد که کارکرد بنیادین پول، «کالا بودن» نیست، بلکه <span class="term" data-en="Unit of account" data-def="کارکردی از پول که آن را نه یک کالا، بلکه یک نظام دفترداری مشترک می‌سازد.">واحد حساب</span> بودن است: سازوکاری برای ثبت و انتقال تعهدات متقابل میان افرادی که لزوماً یکدیگر را نمی‌شناسند یا به هم اعتماد ندارند. پول، در این خوانش، از ابتدا یک فناوری حافظه و حسابداری اجتماعی بوده است، نه یک کالای مصرفی.</p>
+
+    <p>این بازخوانی خاستگاه پول، پلی مستقیم به مسئلهٔ فصل پیشین می‌زند. دقیقاً همان مسئله‌ای که نزد جوامع پیشاتاریخی به‌صورت صدف و مهرهٔ کمیاب حل شده بود — چگونه بتوان تعهدات متقابل را بدون اعتماد شخصی ثبت کرد — چند دهه بعد، بیت‌کوین با تبدیل «سجل تعهدات متقابل» به یک نشانگر محاسباتی کمیاب و بدون نیاز به اعتماد متقابل، از نو حل می‌کند: کمیابی رمزنگارانهٔ حاصل از اثبات کار، همان نقشی را ایفا می‌کند که کمیابی فیزیکی صدف و فلز در گذشته ایفا می‌کرد. اما اگر خاستگاه پول را حل کردیم، هنوز باید بپرسیم: چگونه می‌توان تعهدات را نه‌فقط ثبت، بلکه به‌طور خودکار و بدون دخالت انسانی اجرا کرد؟ این دقیقاً پرسشی است که نیک ابو در نوشتار دیگرش، دربارهٔ قراردادهای هوشمند، پاسخ می‌دهد.</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">منبع: <a href="https://nakamotoinstitute.org/library/shelling-out/" target="_blank" rel="noopener">Shelling Out: The Origins of Money — nakamotoinstitute.org</a></p>
+
+    <figure>
+      <img src="img-4.png" alt="اسطورهٔ مبادلهٔ کالا به کالا، سجل تعهدات متقابل، نشانگر محاسباتی">
+      <figcaption>از مبادلهٔ کالا، به سجل تعهدات متقابل، تا نشانگر محاسباتی: سه مرحلهٔ مفهومی خاستگاه پول.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="ch3">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۳</span> قراردادهای هوشمند: بلوک‌های سازندهٔ بازارهای دیجیتال</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">بر پایهٔ مقالهٔ «Smart Contracts: Building Blocks for Digital Markets» — نیک ابو (۱۹۹۶)</p>
+
+    <p>اگر پول، سازوکاری برای ثبت تعهدات باشد، پرسش بعدی روشن است: چگونه می‌توان تضمین کرد این تعهدات، بدون دخالت مکرر یک واسطهٔ انسانی، واقعاً اجرا شوند؟ نیک ابو، در نوشتاری که سال‌ها پیش از فناوری بلاک‌چین منتشر شد، مفهوم <span class="term" data-en="Smart contract" data-def="پروتکل تراکنشی رایانه‌ای که شروط یک قرارداد را به‌صورت خودکار اجرا می‌کند.">قرارداد هوشمند</span> را دقیقاً برای پاسخ به همین پرسش صورت‌بندی کرد: قراردادی که شروطش نه در کاغذ، بلکه در کد نوشته شده و به‌صورت خودکار اجرا می‌شود.</p>
+
+    <p>نمونهٔ آشنایی که خودِ ابو برای توضیح این ایده به‌کار می‌برد، ماشین فروش خودکار است: دستگاهی که بدون هیچ فروشنده‌ای، شرط «اگر سکه وارد شود، آنگاه کالا خارج شود» را بی‌کم‌وکاست اجرا می‌کند. ابو این ایدهٔ به‌ظاهر ساده را به بستری برای بازتعریف کل بازارهای مالی و حقوقی گسترش می‌دهد: از قراردادهای مشتقه گرفته تا نظام‌های امانی، همه را می‌توان به‌شکل مجموعه‌ای از شروط اجراپذیر توسط کد بازنویسی کرد.</p>
+
+    <p>مزیت مرکزی این رویکرد، آنچه او <span class="term" data-en="Disintermediation" data-def="کنارگذاشتن نهادهای میانجی (بانک، دفترخانه، دادگاه) از فرایند اجرای یک توافق.">حذف واسطه</span> می‌نامد، است: کاهش شدید هزینه‌های تراکنشی که معمولاً صرف اعتمادسازی، وثیقه‌گذاری و پیگیری حقوقی می‌شود. اما نکتهٔ عمیق‌تر این‌جاست که اعتماد در این مدل، دیگر به یک «وعده» بسته نیست، بلکه به یک «دستورالعمل اجرایی» تبدیل می‌شود — تفاوتی که در نگاه اول فنی به‌نظر می‌رسد، اما پیامدهای فلسفی گسترده‌ای دارد.</p>
+
+    <p>همین تفاوت است که زمینه‌ساز ظهور سازمان‌های خودگردان (DAOs) می‌شود و در نهایت، همان دستگاه مفهومی‌ای است که نیک لند آن را «پروتکل در برابر قانون» می‌نامد: اگر قانون همواره نیازمند تفسیر انسانی و اجرای بیرونی است، پروتکل به‌خودی‌خود اجرا می‌شود. با این سه متن فنی پشت سر — سند ناکاموتو، خاستگاه پول، و قراردادهای هوشمند — اکنون بستر لازم برای پرسیدن پرسش فلسفی بنیادین‌تری فراهم شده: اگر تعهد، اعتماد و اجرا همگی از حوزهٔ انسانی به حوزهٔ محاسباتی منتقل شوند، چه بر سر خودِ مفهوم قدرت و حاکمیت می‌آید؟ برای پاسخ به این پرسش، باید به سرچشمهٔ فلسفهٔ سیاسی مدرن بازگردیم: به توماس هابز.</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">منبع: <a href="https://nakamotoinstitute.org/library/smart-contracts-building-blocks-for-digital-markets/" target="_blank" rel="noopener">Smart Contracts: Building Blocks for Digital Markets — nakamotoinstitute.org</a></p>
+
+    <figure>
+      <img src="img-5.png" alt="از ماشین فروش خودکار به سیستم امانی دیجیتال">
+      <figcaption>از ماشین فروش خودکار فیزیکی تا سیستم امانی دیجیتال: منطق «اگر... آنگاه...» به‌مثابه بنیاد قرارداد هوشمند.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+<section id="ch4">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۴</span> لویاتان</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">توماس هابز — ۱۶۵۱ — فصل‌های ۱۳، ۱۴ و ۱۷</p>
+
+    <p>سه متن فنی پیشین، همگی حول یک محور می‌چرخیدند: چگونه می‌توان اعتماد، تعهد و اجرا را بدون واسطهٔ انسانی سامان داد. اما برای فهم عمق این جابه‌جایی، باید نخست بدانیم واسطهٔ انسانی — یعنی همان قدرت حاکم — از کجا آمده و چرا اساساً به آن نیاز داشتیم. توماس هابز، در «لویاتان»، دقیق‌ترین پاسخ کلاسیک به این پرسش را به‌دست می‌دهد.</p>
+
+    <h4>فصل ۱۳ — دربارهٔ وضعیت طبیعی بشر</h4>
+    <p>هابز از این نکته آغاز می‌کند که طبیعت انسان‌ها را از نظر توانایی‌های بدنی و ذهنی چندان نابرابر نساخته که یکی بتواند مدعی امتیازی شود که دیگری از آن محروم است. از همین برابری تقریبی، برابری امید در رسیدن به هدف‌ها برمی‌خیزد؛ و وقتی دو نفر خواهان چیزی یکسان باشند که هر دو نتوانند از آن بهره ببرند، دشمن یکدیگر می‌شوند. او سه ریشهٔ اصلی نزاع را برمی‌شمارد: رقابت بر سر منفعت، بی‌اعتمادی که امنیت می‌طلبد، و افتخار که شهرت می‌جوید. نتیجه، <span class="term" data-en="State of nature" data-def="وضعیت فرضی هابزی که در آن هیچ قدرت مشترکی انسان‌ها را مهار نمی‌کند.">وضعیت طبیعی</span>‌ای است که هابز آن را «جنگ همه علیه همه» می‌نامد — نه صرفاً نبرد واقعی، بلکه تمایل شناخته‌شده و مستمر به آن، تا زمانی که هیچ ضمانتی برخلاف آن وجود نداشته باشد. در چنین وضعیتی نه صنعتی هست، نه کشاورزی، نه دریانوردی، نه معماری، نه هنر، نه جامعه؛ و زندگی انسان، به تعبیر تلخ او، «تنها، فقیر، تنفرآمیز، خشن و کوتاه» است.</p>
+
+    <h4>فصل ۱۴ — دربارهٔ قوانین طبیعت نخست و دوم</h4>
+    <p>حق طبیعی، آزادی هر انسان برای استفاده از قدرت خویش در راه حفظ زندگی خود است. اما قانون طبیعی، قاعده‌ای است که عقل آن را کشف می‌کند: انسان نباید کاری کند که زندگی خودش را نابود سازد. از این‌جا قانون نخست طبیعت زاده می‌شود — تلاش برای صلح تا زمانی که امیدی به آن هست — و قانون دوم: هر انسان باید، به شرط آنکه دیگران نیز چنین کنند، از حق مطلق خود بر همه‌چیز دست بکشد و به همان اندازه آزادی راضی باشد که مایل است دیگران در برابرش داشته باشند.</p>
+
+    <h4>فصل ۱۷ — دربارهٔ علل، پیدایش و تعریف یک جمهوری</h4>
+    <p>غایت نهایی انسان‌ها در نهادن این محدودیت‌ها بر خویش، چیزی نیست جز پیش‌بینی حفظ خود و زندگی رضایت‌بخش‌تر — یعنی بیرون‌آمدن از آن وضعیت اسفناک جنگ که پیامد ضروری هوس طبیعی بشر است، وقتی هیچ <span class="term" data-en="Common power" data-def="مرجع حاکمی که با تهدید به مجازات، نظم اجتماعی را تضمین می‌کند.">قدرت مشترکی</span> در کار نباشد. تنها راه برپایی چنین قدرتی، این است که همه، قدرت و قوت خود را به یک انسان یا مجمعی از انسان‌ها بسپارند تا اراده‌های پراکنده را با قاعدهٔ اکثریت به یک اراده تقلیل دهند. این کار با <span class="term" data-en="Covenant" data-def="پیمان متقابلی که افراد با واگذاری حق حکومت بر خود به یک مرجع واحد، لویاتان را پدید می‌آورند.">میثاقی</span> صورت می‌گیرد که هر انسان با هر انسان دیگر می‌بندد. از این پیمان، آن «لویاتان بزرگ» زاده می‌شود — همان خدای فانی‌ای که صلح و امنیت‌مان را زیر سایهٔ خدای جاودان، مدیون او هستیم.</p>
+
+    <p>نکته‌ای که هابز بر آن تأکید دارد، اما اغلب نادیده گرفته می‌شود، این است: قدرت لویاتان از یک ماهیت متافیزیکی یا الهی برنمی‌خیزد، بلکه صرفاً از تجمیع ارادهٔ افراد و تهدید به مجازات ناشی می‌شود — یعنی از ترس. دقیقاً همین نکته، پل مفهومی لند به سمت بیت‌کوین است: اگر لویاتان هابزی صرفاً یک سازوکار برای حل مسئلهٔ اعتماد جمعی از طریق ترس از مجازات بود، آنگاه شاید بتوان همان مسئله را با سازوکاری غیرانسانی و غیرترسناک نیز حل کرد — سازوکاری که در آن، به‌جای دولت حاکم و ترس از زندان، الگوریتم و غیرممکن‌بودن محاسباتیِ تقلب، نقش ضامن نظم را ایفا کند. این دقیقاً همان ایده‌ای است که فصل بعدی، از دریچهٔ نقد عقل محض کانت، از زاویه‌ای دیگر به آن نزدیک می‌شود: اگر نظم اجتماعی هابزی به یک قرارداد نیاز داشت، نظم شناختی کانتی به چه قالب‌های پیشینی نیاز دارد؟</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">متن اصلی: <a href="https://www.gutenberg.org/ebooks/3207" target="_blank" rel="noopener">Leviathan, Thomas Hobbes (1651) — gutenberg.org/ebooks/3207</a></p>
+
+    <figure>
+      <img src="img-7.png" alt="لویاتان هابز در برابر لویاتان محاسباتی">
+      <figcaption>لویاتان هابز، دولت حاکم را ضامن نظم می‌داند و مجازات را مکانیسم اجرا؛ لویاتان محاسباتی، این نقش را به الگوریتم و شبکه واگذار می‌کند.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="ch5">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۵</span> نقد عقل محض</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">ایمانوئل کانت — ۱۷۸۱ — زیبایی‌شناسی متعالی</p>
+
+    <p>اگر هابز نشان داد که نظم اجتماعی به یک قرارداد بنیادین نیاز دارد، کانت یک قدم عقب‌تر می‌رود و می‌پرسد: پیش از هر قراردادی، ذهن انسان چگونه اساساً قادر است جهان را به‌نحوی منظم تجربه کند؟ پاسخ او در بخش «زیبایی‌شناسی متعالی» نقد عقل محض نهفته است.</p>
+
+    <p>کانت مکان و زمان را نه مفاهیمی برگرفته از تجربه، بلکه <span class="term" data-en="A priori intuition" data-def="شکلی از ادراک که پیش از هر تجربهٔ خاص، در ذهن آماده است.">شهودهای خالص پیشینی</span> می‌داند: قالب‌هایی که ذهن پیش از هر ادراک حسی در اختیار دارد و بدون آن‌ها اساساً امکان تجربه‌کردن هم‌زمانی یا توالی رویدادها وجود نخواهد داشت. به باور او، ما هرگز به «شیء در خود» دسترسی نداریم؛ آنچه می‌شناسیم، همواره <span class="term" data-en="Phenomenon / Noumenon" data-def="تمایز کانتی میان چیزها آن‌گونه که بر ما ظاهر می‌شوند و چیزها آن‌گونه که فی‌نفسه‌اند.">پدیداری</span> است که از صافی مکان، زمان و مقولات فاهمه عبور کرده است. فهم، با به‌کارگیری مقولات، تنوع پراکندهٔ داده‌های حسی را به وحدتی قابل‌شناخت تبدیل می‌کند؛ بی این مقولات، به گفتهٔ کانت، شهودها کورند.</p>
+
+    <p>نیک لند این ساختار پیشینی کانتی را نقطهٔ عزیمتی می‌سازد برای پرسش از بیت‌کوین: اگر زمان و مکان قالب‌های ذهنی‌اند که واقعیت را برای انسان قابل‌فهم می‌کنند، بیت‌کوین چه می‌کند جز ساختن یک قالب پیشینی تازه — این‌بار نه برای ذهن انسانی، بلکه برای واقعیت اقتصادی؟ زنجیرهٔ بلوک‌ها، همچون مکان و زمان کانتی، چارچوبی می‌شود که هر رویداد اقتصادی تنها در نسبت با آن معنا و اعتبار می‌یابد؛ یک تراکنش، پیش از ثبت در بلوک، به همان اندازه «بی‌شکل» است که یک داده حسی پیش از عبور از مقولات فاهمه.</p>
+
+    <p>اما یک قالب پیشینی، به‌تنهایی کافی نیست؛ باید نشان داد این قالب چگونه، بدون هیچ مرجع بیرونی، محاسبه‌پذیر و قابل‌اجراست. برای این گام، باید به سراغ کسی برویم که خودِ مفهوم محاسبه و مرزهای آن را برای اولین‌بار به‌طور دقیق صورت‌بندی کرد: آلن تورینگ.</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">متن اصلی: <a href="https://www.gutenberg.org/ebooks/4280" target="_blank" rel="noopener">Critique of Pure Reason, Immanuel Kant (1781) — gutenberg.org/ebooks/4280</a></p>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="ch6">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۶</span> دربارهٔ اعداد محاسباتی</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">آلن تورینگ — ۱۹۳۶</p>
+
+    <p>تورینگ محاسبه را با تصویر یک «محاسبه‌گر انسانی» آغاز می‌کند که روی نواری تقسیم‌شده به خانه‌ها کار می‌کند: در هر لحظه، رفتارش تنها به نمادی که می‌بیند و «حالت ذهنی» محدودی که دارد بستگی دارد. از این تصویر ساده، او به مفهوم <span class="term" data-en="Universal machine" data-def="ماشینی که می‌تواند رفتار هر ماشین محاسباتی دیگری را، با دریافت توصیفی از آن، شبیه‌سازی کند.">ماشین جهانی</span> می‌رسد: ماشینی که قادر است هر محاسبهٔ محاسبه‌پذیری را انجام دهد. اما در همان مقاله، تورینگ با برهان خلف ثابت می‌کند که ماشینی که بتواند برای هر ماشین و ورودی دیگر تشخیص دهد آیا سرانجام متوقف می‌شود یا نه، نمی‌تواند وجود داشته باشد — همان <span class="term" data-en="Halting problem" data-def="اثبات تورینگ مبنی بر ناممکن‌بودن ساخت ماشینی که برای هر برنامه و ورودی دلخواه، بدون اجرای آن، بتواند از پایان‌یافتنش باخبر شود.">مسئلهٔ توقف</span> که تا امروز یکی از بنیادی‌ترین محدودیت‌های نظری علوم رایانه باقی مانده است.</p>
+
+    <p>لند این محدودیت را نه ضعف، بلکه نشانه‌ای بنیادین می‌بیند: نظام محاسباتی هرگز نمی‌تواند از بیرون بر کلیت خودش احاطه یابد، همان‌طور که هیچ مرجع انسانی هم نمی‌تواند از بیرون تاریخ بر آن ناظر باشد. به باور او، اجماع زنجیرهٔ بلوک‌ها راهی است برای دورزدن این ناتوانی: نه با پیش‌بینی آینده، بلکه با ساختن سازوکاری که حقیقتش را نه از پیش‌بینی، بلکه از تداوم و طولانی‌ترین زنجیرهٔ محقق‌شده می‌گیرد. به این ترتیب، بیت‌کوین به‌جای حل مسئلهٔ توقف، آن را دور می‌زند: به‌جای پرسیدن «این فرایند کِی و چگونه پایان می‌یابد؟»، صرفاً می‌پرسد «تا این لحظه، کدام زنجیره طولانی‌تر است؟».</p>
+
+    <p>با کانت و تورینگ، دو ستون فلسفی و منطقیِ سه‌گانهٔ لند کامل می‌شود: قالب پیشینیِ کانتی و محدودیت محاسباتیِ تورینگی. اما نظریه‌ای که در این نقطه هنوز غایب است، پرسش از خودِ «بودن» زمان است — نه زمان به‌مثابه قالب ذهنی، بلکه زمان به‌مثابه ساختار بنیادین هستی انسانی. برای این پرسش، باید به سراغ فیلسوفی برویم که یک قرن پس از کانت، پروژهٔ او را از نو، و این‌بار با محوریت زمان، بازنویسی کرد: مارتین هایدگر.</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">متن اصلی: <a href="https://www.cs.virginia.edu/~robins/Turing_Paper_1936.pdf" target="_blank" rel="noopener">On Computable Numbers, Alan Turing (1936)</a></p>
+
+    <figure>
+      <img src="img-11.png" alt="کانت و تورینگ: محاسباتی‌کردن تاریخ">
+      <figcaption>ساختارهای پیشینی کانت و محدودیت محاسباتی تورینگ، در ترکیب لند، به قالبی پیشینی برای واقعیت اقتصادی بدل می‌شوند.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+<section id="ch7">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۷</span> هستی و زمان</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">مارتین هایدگر — ۱۹۲۷ — خوانشی تحلیلی</p>
+
+    <p>«هستی و زمان» با این ادعا آغاز می‌شود که فلسفهٔ غرب، پرسش از معنای هستی را فراموش کرده و آن را با هستنده‌ها (اشیا و موجودات) خلط کرده است. هایدگر برای بازگرداندن این پرسش، از تحلیل <span class="term" data-en="Dasein" data-def="اصطلاح هایدگری برای هستندهٔ انسانی، به معنای «آن‌جا-بودن»؛ موجودی که هستی‌اش همواره برایش مسئله است.">دازاین</span> آغاز می‌کند — همان هستندهٔ انسانی که به‌واسطهٔ در-جهان-بودنش، همواره در نسبتی عملی و پیشاتفکری با جهان و ابزارهای پیرامونش قرار دارد؛ پیش از آن‌که دربارهٔ اشیا نظریه‌پردازی کنیم، از پیش با آن‌ها در حال کار و زندگی هستیم.</p>
+
+    <p>بنیاد این هستی، به باور هایدگر، نه فضا بلکه <span class="term" data-en="Temporality" data-def="بنیاد هستی‌شناختی دازاین که هایدگر آن را نه یک توالی از لحظات، بلکه ساختاری یکپارچه از گذشته، حال و آینده می‌داند.">زمانمندی</span> است: دازاین همواره از آینده به‌سوی خود می‌آید (در پیش‌بینی و امکان‌های پیش رو)، در حالی که گذشته را با خود حمل می‌کند (به‌عنوان آنچه از پیش بوده)، و در حالِ حاضر به تصمیم و کنش می‌رسد. زمان، در این تصویر، هرگز رشته‌ای از لحظات یکسان و بی‌تفاوت نیست، بلکه ساختاری است که همواره با دلمشغولی، ترس از مرگ، و امکان‌های آینده گره خورده است.</p>
+
+    <p>نیک لند این ساختار سه‌وجهی زمانمندی را دقیقاً در برابر زمان بلوک می‌گذارد و از این مقایسه، یکی از تندترین گزاره‌های سمینار خود را بیرون می‌کشد. زمان انسانی هایدگری، پیوسته و اندیشناک از مرگ و آینده است؛ زمان بلاک‌چین اما گسسته، بی‌غرض و کاملاً بی‌اعتنا به مرگ یا معنا است — هر بلوک صرفاً رخ می‌دهد، بی‌آنکه دازاینی برای دلمشغولی به آن وجود داشته باشد. به گفتهٔ لند، دقیقاً همین بی‌اعتنایی است که زمان محاسباتی را از سنت پدیدارشناسانه جدا می‌کند: در آن، «بودن» دیگر به معنای دغدغه‌داشتن نیست، بلکه به معنای صرفاً ثبت‌شدن در زنجیره است — نوعی هستی‌شناسی بدون دازاین.</p>
+
+    <p>اگر هایدگر نشان داد که هستی انسانی از زمانمندیِ دلمشغول ساخته شده، پرسش بعدی این است: میل و انرژی‌ای که این دلمشغولی را به حرکت درمی‌آورد، از کجا می‌آید و به کجا می‌رود؟ برای پاسخ به این پرسش، لند به سراغ دو فیلسوف فرانسوی می‌رود که، برخلاف هایدگر، میل را نه یک کمبود اگزیستانسیل، بلکه یک نیروی مولد و بی‌مرکز می‌دانند: ژیل دلوز و فلیکس گتاری.</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">برای مطالعهٔ بیشتر: <a href="https://plato.stanford.edu/entries/heidegger/" target="_blank" rel="noopener">Stanford Encyclopedia of Philosophy — Heidegger</a></p>
+
+    <figure>
+      <img src="img-3.png" alt="زمان انسانی در برابر زمان ماشین">
+      <figcaption>زمان انسانی، خطی و احساسی و وابسته به حافظهٔ متغیر است؛ زمان ماشین، توالی گسسته و تغییرناپذیری از بلوک‌هاست.</figcaption>
+    </figure>
+    <figure>
+      <img src="img-9.png" alt="حقیقت انسانی در برابر حقیقت محاسباتی">
+      <figcaption>حقیقت انسانی، توافقی اجتماعی وابسته به مرجع قدرت است؛ حقیقت محاسباتی، اتساق با طولانی‌ترین زنجیرهٔ اثبات‌کار.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+
+<section id="ch8">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">۰۸</span> سرمایه‌داری و اسکیزوفرنی</h2>
+    <p style="color:var(--text-dim); font-family:'JetBrains Mono',monospace; font-size:.82rem;">ژیل دلوز و فلیکس گتاری — ۱۹۷۲ — خوانشی تحلیلی</p>
+
+    <p>دلوز و گتاری در «آنتی‌اویدیپ» میل را نه به‌مثابه کمبودی که باید سرکوب یا اقناع شود، بلکه به‌مثابه نیرویی تولیدکننده می‌فهمند: <span class="term" data-en="Desiring-machines" data-def="مفهومی دلوزی-گتاری که میل را نه کمبود روانی، بلکه نیرویی تولیدکننده و ماشین‌وار می‌داند.">ماشین‌های میل</span> که به‌طور مستمر جریان تولید می‌کنند و به یکدیگر متصل می‌شوند، بی‌آنکه نیازمند یک مرکز سازمان‌دهنده باشند. این تصویر، وارونهٔ کامل روایت روان‌کاوانه‌ای است که میل را حول یک کمبود اولیه (مثلث اویدیپی) سازمان می‌دهد.</p>
+
+    <p>سرمایه‌داری، در این خوانش، نه صرفاً یک نظام اقتصادی، بلکه دستگاهی است که این جریان‌ها را از کدهای سنتی (خویشاوندی، دین، دولت) می‌گسلد و آزاد می‌کند — فرایندی که آنان آن را <span class="term" data-en="Deterritorialization" data-def="فرایند رهاشدن جریان‌های میل و سرمایه از کدها و مرزهای سنتی.">ناحوطه‌زایی</span> می‌نامند. اما همان سرمایه‌داری، به‌محض گسستن این کدها، بلافاصله جریان آزادشده را با کدهای تازه (بازار، بانک، دولت) از نو می‌بندد؛ نوسانی دائمی میان رهاسازی و بازکدگذاری که به گفتهٔ آنان، منطق درونی و پارادوکسیکال خودِ سرمایه‌داری مدرن است.</p>
+
+    <p>نیک لند بیت‌کوین را تحقق رادیکال همین ناحوطه‌زایی می‌بیند — و این‌جاست که استدلال او از توصیف صرف، به یک ادعای فلسفیِ جسورانه تبدیل می‌شود: پولی که برای نخستین‌بار، از مرزهای ملی، بانک مرکزی و حتی از هرگونه کد دولتی گسسته و به «جریانی خالص» بدل می‌شود، بدون آنکه بلافاصله به کدگذاری تازه‌ای سپرده شود. به باور لند، این همان لحظه‌ای است که ماشین‌های میل دلوزی-گتاری، سرانجام رسانه‌ای می‌یابند که در آن بدون میانجی انسانی نیز می‌توانند جریان یابند — نقطه‌ای که به گفتهٔ او، سرمایه دیگر نیازی به بازکدگذاری انسانی ندارد و می‌تواند صرفاً در قالب محاسباتی خودش جریان یابد.</p>
+
+    <p>با این هشت متن پشت سر — سه سند فنی و پنج ستون فلسفی — اکنون همهٔ ابزار مفهومی لازم برای دنبال‌کردن استدلال خود نیک لند فراهم شده است. بخش سوم کتاب، که در ادامه می‌آید، دقیقاً همین ابزارها را در قالب هشت جلسهٔ سخنرانی او به‌کار می‌گیرد تا نشان دهد چگونه بیت‌کوین، از یک سند نُه‌صفحه‌ای، به رخدادی فلسفی برای بازتعریف زمان، حقیقت، مالکیت و حاکمیت بدل می‌شود.</p>
+    <p style="font-size:.8rem; color:var(--text-dim);">برای مطالعهٔ بیشتر: <a href="https://plato.stanford.edu/entries/deleuze/" target="_blank" rel="noopener">Stanford Encyclopedia of Philosophy — Deleuze</a></p>
+
+    <figure>
+      <img src="img-12.png" alt="ناحوطه‌زایی و جریان خالص سرمایه">
+      <figcaption>ماشین‌های میل سرمایه‌داری، بیت‌کوین را به‌عنوان شکل نهایی فرار سرمایه از مرزهای ملی و بانکی بازمی‌نمایانند.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+<section id="seminars">
+  <div class="container wide">
+    <h2 class="chapter-title"><span class="num">۰۹</span> سخنرانی‌های نیک لند: بیت‌کوین و فلسفه</h2>
+    <p>هشت جلسهٔ زیر، سمینار کامل نیک لند دربارهٔ بیت‌کوین و فلسفه است. هر ویدیو مستقیماً از آرشیو عمومی پخش می‌شود؛ زیر هر پخش‌کننده، تحلیلی از محور فکری همان جلسه و یک راهنمای زمان‌بندی سریع آمده است. ستاره‌های کنار هر ردیف، آن بخش از سخنرانی را به فصل مرتبط در همین کتاب پیوند می‌زنند.</p>
+
+    <div class="session-card" id="s1">
+      <span class="tag">جلسه ۱ / ۸</span>
+      <h4>تحلیل انتزاعی سیستم بیت‌کوین</h4>
+      <div class="theme">محور: بیت‌کوین به‌مثابه یک شیء فلسفی</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%281%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>لند جلسهٔ نخست را با کنارگذاشتن نگاه اقتصادی به بیت‌کوین آغاز می‌کند تا آن را به‌مثابه یک رخداد فلسفی بررسی کند. او نشان می‌دهد چگونه هش، به‌عنوان یک «راز آشکار»، شفافیت کامل تراکنش‌ها را با ناشناسی کامل کاربران در یک ابزار واحد جمع می‌کند؛ تناقضی که به باور او، مفاهیم زمان، حقیقت، مالکیت و قدرت را هم‌زمان بازتعریف می‌کند.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۱۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#foreword">★</a>مقدمه – بیت‌کوین به‌عنوان شیء فلسفی</span></div>
+        <div class="wg-row"><span class="wg-time">۱۵:۰۰–۳۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch1">★</a>مسئلهٔ دوبار خرج‌کردن</span></div>
+        <div class="wg-row"><span class="wg-time">۳۵:۰۰–۶۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch7">★</a>هش، حافظه و زمان ماشین</span></div>
+        <div class="wg-row"><span class="wg-time">۶۰:۰۰–۹۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch5">★</a>حقیقت محاسباتی و انقلاب صنعتی جدید</span></div>
+      </div>
+    </div>
+
+    <div class="session-card" id="s2">
+      <span class="tag">جلسه ۲ / ۸</span>
+      <h4>بازنصب مفاهیم بنیادین: حاکمیت و مالکیت</h4>
+      <div class="theme">محور: از مالکیت حقوقی به مالکیت رمزنگارانه</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%282%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>در این جلسه، لند نشان می‌دهد چگونه در نظام بیت‌کوین، مالکیت دیگر امتیازی نیست که از سوی یک مرجع حقوقی یا دولتی اعطا شود، بلکه صرفاً به «دارابودن یک کلید خصوصی» فروکاسته می‌شود. این جابه‌جایی، به‌مرور، حاکمیت را نیز از دست نهادهای انسانی به پروتکل منتقل می‌کند.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۳۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch4">★</a>مالکیت رمزنگارانه در برابر مالکیت قانونی</span></div>
+        <div class="wg-row"><span class="wg-time">۳۰:۰۰–۶۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch3">★</a>قراردادهای هوشمند – قدرت ضد‌سیاسی</span></div>
+        <div class="wg-row"><span class="wg-time">۶۵:۰۰–۱۰۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch3">★</a>حذف واسطه‌ها و مالکیت مطلق</span></div>
+      </div>
+    </div>
+
+    <div class="session-card" id="s3">
+      <span class="tag">جلسه ۳ / ۸</span>
+      <h4>رازهای آشکار: کلید عمومی، کلید خصوصی و پارادوکس حریم خصوصی</h4>
+      <div class="theme">محور: شفافیت مطلق در برابر ناشناسی مطلق</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%283%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>لند در این جلسه به پارادوکس مرکزی معماری رمزنگارانهٔ بیت‌کوین می‌پردازد: دفتر کل کاملاً عمومی و شفاف است، اما هویت پشت هر کلید در تاریکی مطلق باقی می‌ماند. حریم خصوصی دیگر به معنای «پنهان‌کردن اطلاعات» نیست، بلکه به معنای «در اختیار داشتن یک کلید» است.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۲۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch1">★</a>رازهای آشکار – شفافیت و ناشناسی</span></div>
+        <div class="wg-row"><span class="wg-time">۲۵:۰۰–۶۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch7">★</a>حقیقت در برابر تأیید – ماشین‌-حقیقت</span></div>
+        <div class="wg-row"><span class="wg-time">۶۰:۰۰–۹۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch1">★</a>حذف اعتبار – جایگزینی با اثبات</span></div>
+      </div>
+    </div>
+
+    <div class="session-card" id="s4">
+      <span class="tag">جلسه ۴ / ۸</span>
+      <h4>قدرت محاسباتی و Commercium: سیاست، ضد-سیاست و تکینگی</h4>
+      <div class="theme">محور: قدرت افقی در برابر سلسله‌مراتب عمودی</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%284%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>در نظام بیت‌کوین، قدرت دیگر از بالا به پایین اعمال نمی‌شود، بلکه به‌طور افقی میان گره‌هایی توزیع می‌شود که هرکدام تنها به میزان قدرت پردازشی خود نفوذ دارند. لند این وضعیت را جوانه‌ای می‌داند برای آنچه «تکینگی مصنوعی» می‌نامد.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۳۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch3">★</a>قدرت افقی و Commercium</span></div>
+        <div class="wg-row"><span class="wg-time">۳۰:۰۰–۷۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#s8">★</a>تکینگی مصنوعی – ذهن ماشینی</span></div>
+        <div class="wg-row"><span class="wg-time">۷۰:۰۰–۱۰۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#s6">★</a>مدیریت ارزش توسط ماشین</span></div>
+      </div>
+    </div>
+
+    <div class="session-card" id="s5">
+      <span class="tag">جلسه ۵ / ۸</span>
+      <h4>حقیقت، زمان و هستی: از زمان انسانی به زمان محاسباتی</h4>
+      <div class="theme">محور: هستی‌شناسی دیجیتال</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%285%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>لند در این جلسه، بحث زمانمندی هایدگری را به‌سوی هستی‌شناسی دیجیتال می‌کشاند: زمان محاسباتی دیگر جریانی پیوسته نیست، بلکه یک متغیر گسسته و شمارا — تعداد بلوک‌ها — است، و «بودن» برای یک تراکنش به معنای «ثبت‌شدن در زنجیره» است.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۳۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch7">★</a>زمان انسانی به زمان محاسباتی</span></div>
+        <div class="wg-row"><span class="wg-time">۳۵:۰۰–۷۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch1">★</a>حقیقت به‌عنوان اتساق زنجیره</span></div>
+        <div class="wg-row"><span class="wg-time">۷۵:۰۰–۱۱۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch7">★</a>هستی‌شناسی دیجیتال – بودن یعنی ثبت</span></div>
+      </div>
+    </div>
+
+    <div class="session-card" id="s6">
+      <span class="tag">جلسه ۶ / ۸</span>
+      <h4>تکینگی و بازگشت: ماشین‌های میل، جریان سرمایه و سیگنال از آینده</h4>
+      <div class="theme">محور: بیت‌کوین به‌مثابه سیگنالی از آینده</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%286%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>لند بیت‌کوین را زیرساختی می‌بیند که برای ماشین‌های آینده آماده می‌شود؛ انسان‌ها در این روایت صرفاً کاتالیزورهایی هستند که سیستم را به‌راه می‌اندازند، بی‌آنکه کنترلی بر مسیر نهایی آن داشته باشند.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۳۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch8">★</a>ماشین‌های میل – جریان سرمایه</span></div>
+        <div class="wg-row"><span class="wg-time">۳۰:۰۰–۶۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch8">★</a>بیت‌کوین به‌عنوان سیگنال آینده</span></div>
+        <div class="wg-row"><span class="wg-time">۶۵:۰۰–۱۰۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch4">★</a>فروپاشی ساختارهای انسانی</span></div>
+      </div>
+    </div>
+
+    <div class="session-card" id="s7">
+      <span class="tag">جلسه ۷ / ۸</span>
+      <h4>تحلیل نهایی پروتکل: قانون در برابر پروتکل و مرگ عاملیت انسانی</h4>
+      <div class="theme">محور: قانون به‌مثابه تفسیر، پروتکل به‌مثابه اجرا</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%287%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>لند در این جلسه تمایز مرکزی خود میان قانون و پروتکل را صورت‌بندی می‌کند: قانون همواره مبهم است و نیازمند تفسیر، متکی بر زور و دارای استثناست؛ پروتکل اما مطلق، ریاضی و بدون هیچ استثنایی اجرا می‌شود.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۳۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch4">★</a>قانون در برابر پروتکل – اجرا بدون تفسیر</span></div>
+        <div class="wg-row"><span class="wg-time">۳۰:۰۰–۶۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch7">★</a>مرگ عاملیت انسانی</span></div>
+        <div class="wg-row"><span class="wg-time">۶۵:۰۰–۹۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch6">★</a>حاکمیت کد – ریاضیات مطلق</span></div>
+      </div>
+    </div>
+
+    <div class="session-card" id="s8">
+      <span class="tag">جلسه ۸ / ۸</span>
+      <h4>جمع‌بندی و افق‌های نهایی: لویاتان دیجیتال و سرمایه‌داری محاسباتی</h4>
+      <div class="theme">محور: پایان عصر انسانی مدیریت ارزش</div>
+      <div class="media-box"><video controls preload="none">
+        <source src="https://archive.org/download/nick-land-bitcoin-and-philosophy/Nick%20Land%20-%20Bitcoin%20and%20Philosophy/Bitcoin%20and%20Philosophy%20%288%20of%208%29.mp4" type="video/mp4">
+      </video></div>
+      <p>در جلسهٔ پایانی، لند تمام رشته‌های سمینار را در تصویر «لویاتان دیجیتال» گره می‌زند: اگر لویاتان هابزی از ترس مجازات مشروعیت می‌گرفت، لویاتان محاسباتی، اجبار را مستقیماً در کد جای می‌دهد. به باور لند، این خروج از عصر انسانی مدیریت ارزش و ورود به دوران سرمایه‌داری محاسباتی است.</p>
+      <div class="watch-guide">
+        <div class="wg-title">راهنمای تماشای سریع</div>
+        <div class="wg-row"><span class="wg-time">۰۰:۰۰–۴۵:۰۰</span><span class="wg-topic"><a class="wg-star" href="#s1">★</a>بیت‌کوین به‌عنوان شیء فلسفی – مرور نهایی</span></div>
+        <div class="wg-row"><span class="wg-time">۴۵:۰۰–۹۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch4">★</a>لویاتان دیجیتال – اجبار در کد</span></div>
+        <div class="wg-row"><span class="wg-time">۹۰:۰۰–۱۲۰:۰۰</span><span class="wg-topic"><a class="wg-star" href="#ch8">★</a>سرمایه‌داری محاسباتی – انقلاب صنعتی چهارم</span></div>
+      </div>
+    </div>
+
+    <figure>
+      <img src="img-6.png" alt="قانون در برابر پروتکل">
+      <figcaption>قانون مبهم، نیازمند تفسیر و دارای استثناست؛ پروتکل مطلق، ریاضی و بدون استثناست — ظهور قدرتی ضد-سیاسی.</figcaption>
+    </figure>
+    <figure>
+      <img src="img-8.png" alt="راز آشکار: کلید عمومی و کلید خصوصی">
+      <figcaption>شفافیت مطلق دفتر کل عمومی در برابر تاریکی مطلق کلید خصوصی: مالکیت رمزنگارانه به‌جای امتیاز دولتی.</figcaption>
+    </figure>
+    <figure>
+      <img src="img-13.png" alt="تکینگی مصنوعی">
+      <figcaption>انسان‌ها تنها کاتالیزورهای ساخت زیرساخت زندگی ماشین‌هایند؛ عصر مداخلهٔ انسانی در مدیریت ارزش به پایان رسیده است.</figcaption>
+    </figure>
+  </div>
+</section>
+
+<hr class="divider">
+<section id="podcast">
+  <div class="container">
+    <h2 class="chapter-title"><span class="num">◆</span> پادکست: خلاصهٔ شنیداری کتاب</h2>
+    <p>برای شنیدن نسخهٔ فشرده و روایی این مسیر فکری — از سند ناکاموتو تا افق‌های نهایی لند — پادکست زیر را گوش کنید.</p>
+    <div class="media-box">
+      <audio controls preload="none">
+        <source src="podcast.m4a" type="audio/mp4">
+        مرورگر شما از پخش صوت پشتیبانی نمی‌کند.
+      </audio>
+    </div>
+  </div>
+</section>
+
+<div class="container">
+<div class="archive-final" id="archive-final">
+  <div style="color:var(--text-dim); font-size:.8rem; margin-bottom:10px;">آرشیو کامل</div>
+  <a href="https://archive.org/details/nick-land-bitcoin-and-philosophy" target="_blank" rel="noopener" style="font-size:1rem;">
+    آرشیو پروژهٔ «بیت‌کوین و فلسفه» (شامل ارجاعات کامل) — archive.org
+  </a>
+</div>
+</div>
+
+<footer class="end-colophon" id="colophon-end">
+  <div class="container">
+    <div class="colophon">
+      <div><b>عنوان اثر:</b> بیت‌کوین و فلسفه</div>
+      <div><b>بر پایهٔ:</b> سمینار هشت‌جلسه‌ای نیک لند</div>
+      <div><b>گردآوری، تدوین و ویرایش فارسی:</b> پویان کرمی</div>
+      <div><b>متون پایه:</b> ساتوشی ناکاموتو، نیک ابو، توماس هابز، ایمانوئل کانت، آلن تورینگ، مارتین هایدگر، ژیل دلوز و فلیکس گتاری</div>
+      <div class="credit-line">ترجمه و تلخیص: Sonnet / ویرایش: GPT / تصنیع: Pouyan / طراحی: Mistral / اصلاح: Gemma / صوت و تصویر: Gemini</div>
+    </div>
+  </div>
+</footer>
+
+<script>
+function toggleDrawer(id){
+  var d = document.getElementById(id);
+  var ov = document.getElementById('overlay');
+  var isOpen = d.classList.contains('open');
+  document.querySelectorAll('.drawer').forEach(function(el){el.classList.remove('open');});
+  if(!isOpen){ d.classList.add('open'); ov.classList.add('open'); }
+  else { ov.classList.remove('open'); }
+}
+document.getElementById('overlay').addEventListener('click', function(){
+  document.querySelectorAll('.drawer').forEach(function(el){el.classList.remove('open');});
+  this.classList.remove('open');
+});
+document.querySelectorAll('.toc-tree a').forEach(function(a){
+  a.addEventListener('click', function(){
+    document.querySelectorAll('.drawer').forEach(function(el){el.classList.remove('open');});
+    document.getElementById('overlay').classList.remove('open');
+  });
+});
+
+function setScale(v, btn){
+  document.documentElement.style.setProperty('--font-scale', v);
+  localStorage.setItem('bp_scale', v);
+  document.querySelectorAll('#scaleBtns button').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+}
+function setLH(v){
+  document.documentElement.style.setProperty('--line-height', v);
+  localStorage.setItem('bp_lh', v);
+}
+
+var THEMES = {
+  cyber:   { green:'#39ff88', dim:'#1f8f52', red:'#ff3b4e', gold:'#d9b04b' },
+  noir:    { green:'#e7e7e7', dim:'#8a8a8a', red:'#ff5a5a', gold:'#c9a15a' },
+  crimson: { green:'#ff5f6d', dim:'#9c2c35', red:'#ffb020', gold:'#e8c27a' },
+  violet:  { green:'#c561ff', dim:'#7a3ea8', red:'#00e5ff', gold:'#ff8fd6' }
+};
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  if(hex.length===3){ hex = hex.split('').map(function(c){return c+c;}).join(''); }
+  var num = parseInt(hex,16);
+  return [(num>>16)&255, (num>>8)&255, num&255];
+}
+function rgba(hex, a){ var c = hexToRgb(hex); return 'rgba('+c[0]+','+c[1]+','+c[2]+','+a+')'; }
+function applyTheme(name){
+  var t = THEMES[name] || THEMES.cyber;
+  var r = document.documentElement.style;
+  r.setProperty('--green', t.green);
+  r.setProperty('--green-dim', t.dim);
+  r.setProperty('--red', t.red);
+  r.setProperty('--gold', t.gold);
+  r.setProperty('--green-a10', rgba(t.green,0.10));
+  r.setProperty('--green-a15', rgba(t.green,0.15));
+  r.setProperty('--green-a30', rgba(t.green,0.30));
+  r.setProperty('--green-a35', rgba(t.green,0.35));
+  r.setProperty('--green-a40', rgba(t.green,0.40));
+  r.setProperty('--green-a60', rgba(t.green,0.60));
+  r.setProperty('--red-a09', rgba(t.red,0.09));
+  r.setProperty('--gold-a06', rgba(t.gold,0.06));
+  r.setProperty('--gold-a07', rgba(t.gold,0.07));
+  r.setProperty('--gold-a08', rgba(t.gold,0.08));
+}
+function setTheme(name, btn){
+  applyTheme(name);
+  localStorage.setItem('bp_theme', name);
+  document.querySelectorAll('#themeBtns button').forEach(function(b){b.classList.remove('active');});
+  if(btn) btn.classList.add('active');
+}
+(function(){
+  var sc = localStorage.getItem('bp_scale');
+  if(sc){
+    document.documentElement.style.setProperty('--font-scale', sc);
+    document.querySelectorAll('#scaleBtns button').forEach(function(b){
+      b.classList.toggle('active', b.getAttribute('data-scale') === sc);
+    });
+  }
+  var lh = localStorage.getItem('bp_lh');
+  if(lh){ document.documentElement.style.setProperty('--line-height', lh); document.getElementById('lhRange').value = lh; }
+  var th = localStorage.getItem('bp_theme') || 'cyber';
+  applyTheme(th);
+  document.querySelectorAll('#themeBtns button').forEach(function(b){
+    b.classList.toggle('active', b.getAttribute('data-theme') === th);
+  });
+})();
+</script>
+</body>
+</html>
